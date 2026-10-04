@@ -42,6 +42,22 @@ jobs:
         run: |
           npx cap add android
 
+      - name: Fix Kotlin Duplicate Classes Conflict
+        run: |
+          # إضافة إعدادات توحيد إصدارات كوتلين داخل build.gradle
+          cat << 'EOF' >> android/app/build.gradle
+
+          configurations.all {
+              resolutionStrategy {
+                  eachDependency { DependencyResolveDetails details ->
+                      if (details.requested.group == 'org.jetbrains.kotlin') {
+                          details.useVersion '1.8.22'
+                      }
+                  }
+              }
+          }
+          EOF
+
       - name: Set Landscape Orientation
         run: |
           sed -i 's/<activity /<activity android:screenOrientation="sensorLandscape" /' android/app/src/main/AndroidManifest.xml
