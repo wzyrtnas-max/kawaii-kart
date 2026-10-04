@@ -22,18 +22,24 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: 17
+          java-version: 21
 
       - name: Prepare Project Structure
         run: |
           mkdir -p www
-          cp *.html www/index.html 2>/dev/null || cp -r * www/ 2>/dev/null || true
+          cp *.html www/index.html 2>/dev/null || true
           npm init -y
           npm install @capacitor/core @capacitor/cli @capacitor/android
+          cat << 'EOF' > capacitor.config.json
+          {
+            "appId": "com.hellokitty.racing",
+            "appName": "Hello Kitty Cute Racing",
+            "webDir": "www"
+          }
+          EOF
 
-      - name: Initialize Capacitor
+      - name: Add Android Platform
         run: |
-          npx cap init "Hello Kitty Cute Racing" "com.hellokitty.racing" --web-dir www
           npx cap add android
 
       - name: Set Landscape Orientation
@@ -41,7 +47,8 @@ jobs:
           sed -i 's/<activity /<activity android:screenOrientation="sensorLandscape" /' android/app/src/main/AndroidManifest.xml
 
       - name: Sync Capacitor
-        run: npx cap sync android
+        run: |
+          npx cap sync android
 
       - name: Build Debug APK
         run: |
